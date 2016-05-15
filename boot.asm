@@ -7,16 +7,16 @@ start:
   ;; the p3 table
   mov eax, p3_table
   or eax, 0b11
-  move dword [p4_table + 0], eax
+  mov dword [p4_table + 0], eax
   ;; Point the first entry of the level three page table to the first entry in
   ;; the p2 table
   mov eax, p2_table
   or eax, 0b11
-  move dword [p3_table + 0], eax
+  mov dword [p3_table + 0], eax
   ;; Point each level two page table entry to a page
   mov ecx, 0                    ; counter variable
 .map_p2_table:
-  uov eax 0x2000000             ; 2Mib
+  mov eax, 0x2000000             ; 2Mib
   mul ecx
   or eax, 0b10000011
   mov [p2_table + ecx * 8], eax
