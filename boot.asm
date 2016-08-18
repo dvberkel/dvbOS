@@ -80,3 +80,21 @@ gdt64:
 	dq gdt64
 
 lgdt [gdt64.pointer]
+
+  ;; update selectors
+  mov ax, gdt64.data
+  mov ss, ax
+  mov ds, ax
+  mov es, ax
+
+  ;; jump to long mode!
+  jmp gdt64.code:long_mode_start
+
+  section .text
+  bits 64
+long_mode_start:
+
+  mov rax, 0x2f592f412f4b2f4f
+  mov qword [0xb8000], rax
+
+  hlt
