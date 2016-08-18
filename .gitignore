@@ -2,3 +2,5 @@
 *.bin
 *.iso
 /build/isofiles/boot/grub/grub.cfg
+target
+Cargo.lock
