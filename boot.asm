@@ -23,6 +23,7 @@ start:
   inc ecx
   cmp ecx, 512
   jne .map_p2_table
+  ;; move page table address to cr3
   mov eax, p4_table
   mov cr3, eax
   ;; enable Physical Address Extension (PAE)
@@ -30,10 +31,16 @@ start:
   or eax, 1 << 5
   mov cr4, eax
   ;; set the long mode bit
+  mov ecx, 0xC0000080
+  rdmsr
+  or eax, 1 << 8
+  wrmsr
+  ;; enable paging
   mov eax, cr0
   or eax, 1 << 31
   or eax, 1 << 16
   mov cr0, eax
+
   ;; Greet
   mov word [0xb8000], 0x0248    ; H
   mov word [0xb8002], 0x0265    ; e
@@ -63,7 +70,9 @@ p2_table:
   section .rodata
 gdt64:
   dq 0
+  .code: equ $ - gdt64
 	dq (1<<44) | (1<<47) | (1<<41) | (1<<43) | (1<<53)
+  .data: equ $ - gdt64
 	dq (1<<44) | (1<<47) | (1<<41)
 
 .pointer:
