@@ -1,4 +1,5 @@
   global start
+	extern kmain
 
   section .text
   bits 32
@@ -40,7 +41,20 @@ start:
   or eax, 1 << 31
   or eax, 1 << 16
   mov cr0, eax
+  ;; load the Global Desciptor Table (GDT)
+	lgdt [gdt64.pointer]
 
+	;; update selectors
+	mov ax, gdt64.data
+	mov ss, ax
+	mov ds, ax
+	mov es, ax
+
+	;; jump to long mode!
+	jmp gdt64.code:kmain
+
+  hlt
+  
   section .bss
   align 4096
 
@@ -54,31 +68,10 @@ p2_table:
   section .rodata
 gdt64:
   dq 0
-  .code: equ $ - gdt64
+.code: equ $ - gdt64
 	dq (1<<44) | (1<<47) | (1<<41) | (1<<43) | (1<<53)
-  .data: equ $ - gdt64
+.data: equ $ - gdt64
 	dq (1<<44) | (1<<47) | (1<<41)
-
 .pointer:
 	dw .pointer - gdt64 - 1
 	dq gdt64
-
-lgdt [gdt64.pointer]
-
-  ;; update selectors
-  mov ax, gdt64.data
-  mov ss, ax
-  mov ds, ax
-  mov es, ax
-
-  ;; jump to long mode!
-  jmp gdt64.code:long_mode_start
-
-  section .text
-  bits 64
-long_mode_start:
-
-  mov rax, 0x2f592f412f4b2f4f
-  mov qword [0xb8000], rax
-
-  hlt
